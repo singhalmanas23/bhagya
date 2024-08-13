@@ -16,7 +16,7 @@ mongoose.connect('mongodb+srv://singhalmanas20:Rummy123@cluster0.lttbs.mongodb.n
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-console.log(process.env.MONGODB_URI);
+
 
 const db = mongoose.connection;
 
