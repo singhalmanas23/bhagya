@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+
 require('dotenv').config();
 
 const app = express();
@@ -12,7 +13,7 @@ app.use(cors({
 
 app.use(express.json());
 
-mongoose.connect('mongodb+srv://singhalmanas20:Rummy123@cluster0.lttbs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -45,7 +46,7 @@ const Item = mongoose.model('items', itemSchema);
 app.get('/api/all-items', async (req, res) => {
   try {
     const items = await Item.find();
-    console.log("Items fetched from DB:", items);  // Log fetched items
+    console.log("Items fetched from DB:", items);  
     res.json(items);
   } catch (error) {
     res.status(500).send(error.message);
@@ -72,7 +73,6 @@ app.get('/api/items', async (req, res) => {
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(23, 59, 59, 999);
 
-    // Log the final query
     console.log("Query:", {
       Date: {
         $gte: startDate,
@@ -100,7 +100,6 @@ app.post('/api/data', async (req, res) => {
   try {
     const formData = req.body;
 
-    // Convert the date string to a Date object
     formData.Date = new Date(formData.Date);
 
     const newItem = new Item(formData);
