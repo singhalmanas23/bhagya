@@ -30,7 +30,7 @@ db.once('open', () => {
 });
 
 const itemSchema = new mongoose.Schema({
-  Date: Date.now,
+  Date: Date,
   Time: String,
   MA: String,
   MB: String,
