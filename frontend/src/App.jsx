@@ -42,7 +42,7 @@ function App() {
   
   const handleSearch = async () => {
     try {
-      const response = await axios.get("http://localhost:5003/api/items", {
+      const response = await axios.get("https://areen.onrender.com/api/items", {
         params: {
           startDate: startDate,
           endDate: endDate,
