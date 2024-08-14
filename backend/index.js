@@ -7,7 +7,7 @@ const app = express();
 const port = 5003;
 
 app.use(cors({
-  origin: 'http://localhost:5173'  
+  origin: 'https://areen-hw2i.vercel.app/'  
 }));
 
 app.use(express.json());
