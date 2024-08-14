@@ -7,8 +7,12 @@ const app = express();
 const port = 5003;
 
 app.use(cors({
-  origin: 'https://areen-bk9q.vercel.app'  
+  origin: [
+    'https://areen-bk9q.vercel.app',  // Production domain
+    'http://localhost:5174'           // Local development
+  ]
 }));
+
 
 app.use(express.json());
 
@@ -26,7 +30,7 @@ db.once('open', () => {
 });
 
 const itemSchema = new mongoose.Schema({
-  Date: Date,
+  Date: Date.now,
   Time: String,
   MA: String,
   MB: String,
