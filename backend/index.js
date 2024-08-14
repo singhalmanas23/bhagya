@@ -7,7 +7,7 @@ const app = express();
 const port = 5003;
 
 app.use(cors({
-  origin: 'https://areen-hw2i.vercel.app'  
+  origin: 'https://areen-bk9q.vercel.app'  
 }));
 
 app.use(express.json());
