@@ -99,7 +99,7 @@ app.get('/api/items', async (req, res) => {
 });
 
 
-app.post('api/data', async (req, res) => {
+app.post('/api/data', async (req, res) => {
   try {
     const formData = req.body;
 
