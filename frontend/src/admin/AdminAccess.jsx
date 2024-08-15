@@ -63,7 +63,7 @@ const AdminAccess = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://areen.onrender.com//api/data", formData);
+      await axios.post("https://areen.onrender.com/api/data", formData);
       alert("Data uploaded successfully");
       setFormData({
         Date: "",
