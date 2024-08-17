@@ -8,9 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start":"vite run"
+    "start": "vite run"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.6.0",
     "axios": "^1.7.3",
     "dotenv": "^16.4.5",
     "react": "^18.3.1",

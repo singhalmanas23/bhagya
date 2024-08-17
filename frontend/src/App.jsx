@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import AdminAccess from "./admin/AdminAccess";
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 function App() {
   const [startDate, setStartDate] = useState("");
@@ -20,94 +21,86 @@ function App() {
       year: "numeric",
     });
   };
-  
 
   useEffect(() => {
     if (startDate && endDate) {
-      setResultText(`From: ${startDate} To: ${endDate}`);
+      setResultText(`From: ${formattedDate(startDate)} To: ${formattedDate(endDate)}`);
     } else if (startDate) {
-      setResultText(`For Date: ${startDate}`);
+      setResultText(`For Date: ${formattedDate(startDate)}`);
     } else {
       setResultText("Result of Today");
     }
   }, [startDate, endDate]);
 
-  const reverseDate = (dateStr) => {
-    // Assuming dateStr is in "dd-mm-yyyy" format
-    const [day, month, year] = dateStr.split("-");
-    return `${year}-${month}-${day}`;
-  };
-  
-
-  
   const handleSearch = async () => {
     try {
-      const response = await axios.get("https://areen.onrender.com/api/items", {
+      const response = await axios.get("http://localhost:5003/api/items", {
         params: {
-          startDate: startDate,
-          endDate: endDate,
+          startDate: startDate || formDate(new Date()),
+          endDate: endDate || formDate(new Date()),
         },
       });
-      console.log("API Response Data:", response.data); // Inspect the data
       setData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Error fetching data");
     }
   };
-  
-  
-  
+
   const formDate = (date) => {
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  
+
+  const formatTime = (hour, minutes, period) => {
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${period}`;
+  };
+
   const generateTodayRows = () => {
     const today = new Date();
     const timeSlots = [];
-  
-    // Generate time slots from 9:00 A.M. to 9:00 P.M.
+    
     for (let hour = 9; hour <= 21; hour++) {
-      const period = hour < 12 ? 'A.M.' : 'P.M.';
-      const displayHour = hour % 12 || 12; // Convert 24-hour to 12-hour format
+      const period = hour < 12 ? 'AM' : 'PM';
+      const interval = hour < 11 ? ['00', '15', '30', '45'] : ['00', '20', '40'];
   
-      for (let minutes of ['00', '15', '30', '45']) {
-        // Special case for 12:00 P.M. and 9:00 P.M.
-        if (hour === 12 && minutes === '00') {
-          timeSlots.push(`${displayHour}:${minutes} P.M.`);
-        } else if (hour === 21 && minutes === '00') {
-          timeSlots.push(`9:00 P.M.`);
-        } else {
-          timeSlots.push(`${displayHour}:${minutes} ${period}`);
-        }
+      for (let minutes of interval) {
+        timeSlots.push(formatTime(hour, minutes, period));
       }
     }
   
     return timeSlots.map((time) => ({
-      Date: formDate(today),
+      Date: today.toISOString().split('T')[0],
       Time: time,
     }));
   };
-  
-
 
   const rowsToRender = data.length === 0 ? generateTodayRows() : data;
 
+  const handleDataUpdate = async () => {
+    try {
+      const response = await axios.get("http://localhost:5003/api/today-items");
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching updated data:", error);
+    }
+  };
+
   return (
     <div className="p-4 h-screen overflow-y-auto">
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4 ml-[800px]">
         <button
           onClick={() => setShowAdminAccess(!showAdminAccess)}
-          className="bg-custom-red text-white px-4 py-2 rounded"
+          className="text-black p-2 rounded flex  "
         >
-          Admin
+          <i className="fas fa-user-shield text-lg"></i>
         </button>
       </div>
 
-      {showAdminAccess && <AdminAccess />}
+      {showAdminAccess && <AdminAccess onDataUpdate={handleDataUpdate} />}
 
       <h1 className="text-2xl font-semibold text-center mb-4">Show Result</h1>
       <div className="flex flex-row justify-center space-x-4 mb-4">
@@ -125,10 +118,7 @@ function App() {
         </div>
 
         <div className="flex flex-row">
-          <label
-            className="text-sm font-bold mb-1 flex flex-row"
-            htmlFor="endDate"
-          >
+          <label className="text-sm font-bold mb-1 flex flex-row" htmlFor="endDate">
             End Date:
           </label>
           <input
@@ -152,12 +142,12 @@ function App() {
         <p className="text-center text-sm font-bold mb-4">{resultText}</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-black border border-white">
+      <div className="w-[1200px]">
+        <table className="min-w-full bg-black border border-white text-xs sm:text-base">
           <thead>
             <tr className="bg-custom-red text-white">
-              <th className="border border-gray-300">Date</th>
-              <th className="border border-gray-300">Time</th>
+              <th className="border border-gray-300 w-28 sm:w-28">Date</th>
+              <th className="border border-gray-300 w-28 sm:w-28">Time</th>
               <th className="border border-gray-300">MA</th>
               <th className="border border-gray-300">MB</th>
               <th className="border border-gray-300">MC</th>
@@ -173,10 +163,10 @@ function App() {
           <tbody className="text-custom-yellow">
             {rowsToRender.map((item, index) => (
               <tr key={index}>
-                <td className="py-2 px-4 border border-gray-200 text-white">
+                <td className="py-2 px-4 border border-gray-200 text-white w-24  sm:text-[18px]">
                   {formattedDate(item.Date)}
                 </td>
-                <td className="py-2 px-4 border border-gray-200">
+                <td className="py-2 px-4 border border-gray-200 w-24 ">
                   {item.Time}
                 </td>
                 <td className="py-2 px-4 border border-gray-200">
