@@ -5,6 +5,7 @@ const AdminAccess = ({ onDataUpdate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [data, setData] = useState([]);
   const [formData, setFormData] = useState({
     Date: "",
     Time: "",
@@ -20,12 +21,21 @@ const AdminAccess = ({ onDataUpdate }) => {
     MJ: "",
   });
 
+  const getData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5003/api/update");
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   const formatTime12Hour = (date) => {
     let hours = date.getHours();
     let minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
-    hours = hours ? hours : 12; // Hour '0' should be '12'
+    hours = hours ? hours : 12; 
     minutes = minutes < 10 ? "0" + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
   };
@@ -37,15 +47,15 @@ const AdminAccess = ({ onDataUpdate }) => {
       const now = new Date();
       const formattedTime12 = formatTime12Hour(now);
 
-      setCurrentTime(formattedTime12); // Set initial time in 12-hour format
+      setCurrentTime(formattedTime12);
       setFormData((prev) => ({ ...prev, Time: formattedTime12 }));
     };
 
-    updateTime(); // Set initial time
+    updateTime(); 
 
-    const intervalId = setInterval(updateTime, 60000); // Update every minute
+    const intervalId = setInterval(updateTime, 60000); 
 
-    return () => clearInterval(intervalId); // Clean up the interval
+    return () => clearInterval(intervalId); 
   }, []);
 
   const handleLogin = async () => {
@@ -57,6 +67,7 @@ const AdminAccess = ({ onDataUpdate }) => {
 
       if (response.data.success) {
         setIsAuthenticated(true);
+        getData(); 
       } else {
         alert("Invalid username or password");
       }
@@ -72,7 +83,7 @@ const AdminAccess = ({ onDataUpdate }) => {
       await axios.post("http://localhost:5003/api/data", formData);
       alert("Data uploaded successfully");
 
-      // Notify parent component about data update
+      getData();
       if (onDataUpdate) {
         onDataUpdate();
       }
@@ -102,6 +113,7 @@ const AdminAccess = ({ onDataUpdate }) => {
     setUsername("");
     setPassword("");
     window.location.reload();
+    getData();
   };
 
   return (
@@ -200,7 +212,7 @@ const AdminAccess = ({ onDataUpdate }) => {
               </button>
             </div>
           </form>
-          
+         
         </div>
       )}
     </div>

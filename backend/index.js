@@ -8,7 +8,10 @@ const port = 5003;
 
 app.use(
   cors({
-    origin: ["https://areen-bk9q.vercel.app", "http://localhost:5173"],
+    origin: [
+             "https://areen-bk9q.vercel.app",
+             "http://localhost:5173"
+            ],
   })
 );
 
@@ -49,10 +52,8 @@ app.post("/api/login", (req, res) => {
   const adminUsername = process.env.ADMIN_USERNAME;
   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  // console.log('Received Username:', username);
-  // console.log('Received Password:', password);
-  // console.log('Expected Username:', adminUsername);
-  // console.log('Expected Password:', adminPassword);
+
+
 
   if (username === adminUsername && password === adminPassword) {
     res.status(200).json({ success: true, message: "Authentication successful" });
@@ -98,6 +99,26 @@ app.get("/api/items", async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send(error.message);
+  }
+});
+
+app.get("/api/update", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+
+    const updatedItems = await Item.find({
+      Date: { $gte: today, $lt: tomorrow }
+    }).sort({ updatedAt: -1 });
+
+    res.status(200).json(updatedItems);
+  } catch (error) {
+    console.error('Error updating today\'s items:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

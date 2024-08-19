@@ -31,16 +31,36 @@ function App() {
       setResultText("Result of Today");
     }
   }, [startDate, endDate]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5003/api/update");
+        const updatedData = mergeWithGeneratedRows(response.data);
+        setData(updatedData);
+      } catch (error) {
+        console.error("Error fetching today's data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSearch = async () => {
     try {
-      const response = await axios.get("http://localhost:5003/api/items", {
-        params: {
-          startDate: startDate || formDate(new Date()),
-          endDate: endDate || formDate(new Date()),
-        },
-      });
-      setData(response.data);
+      if (!startDate && !endDate) {
+        // No dates selected, fetch today's data using the /api/update endpoint
+        const response = await axios.get("http://localhost:5003/api/update");
+        const updatedData = mergeWithGeneratedRows(response.data);
+        setData(updatedData);
+      } else {
+        const response = await axios.get("http://localhost:5003/api/items", {
+          params: {
+            startDate: startDate || formDate(new Date()),
+            endDate: endDate || formDate(new Date()),
+          },
+        });
+        setData(response.data);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Error fetching data");
@@ -78,7 +98,14 @@ function App() {
     }));
   };
 
-  const rowsToRender = data.length === 0 ? generateTodayRows() : data;
+  const mergeWithGeneratedRows = (fetchedData) => {
+    const generatedRows = generateTodayRows();
+    
+    return generatedRows.map((row) => {
+      const matchingRow = fetchedData.find((item) => item.Time === row.Time);
+      return matchingRow || row;
+    });
+  };
 
   const handleDataUpdate = async () => {
     try {
@@ -92,51 +119,54 @@ function App() {
   return (
     <div className="p-4 h-screen overflow-y-auto">
       <div className="flex justify-end mb-4 ml-[800px]">
-        <button
-          onClick={() => setShowAdminAccess(!showAdminAccess)}
-          className="text-black p-2 rounded flex  "
-        >
-          <i className="fas fa-user-shield text-lg"></i>
-        </button>
+      <button
+  onClick={() => setShowAdminAccess(!showAdminAccess)}
+  className="text-black p-2 rounded flex absolute top-4 left-4 lg:left-auto lg:right-4"
+>
+  <i className="flex flex-col-reverse fas fa-user-shield text-lg"></i>
+</button>
+
       </div>
 
       {showAdminAccess && <AdminAccess onDataUpdate={handleDataUpdate} />}
 
       <h1 className="text-2xl font-semibold text-center mb-4">Show Result</h1>
-      <div className="flex flex-row justify-center space-x-4 mb-4">
-        <div className="flex flex-row">
-          <label className="text-sm font-bold mb-1" htmlFor="startDate">
-            Start Date:
-          </label>
-          <input
-            type="date"
-            id="startDate"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="px-1 h-6 border border-gray-300 rounded"
-          />
-        </div>
+      <div className="flex lg:flex-row flex-col lg:justify-center lg:gap-4 gap-2 mb-4 ml-8">
+  <div className="flex flex-col lg:flex-row lg:items-center lg:gap-2">
+    <label className="text-sm font-bold mb-1 lg:mb-0" htmlFor="startDate">
+      Start Date:
+    </label>
+    <input
+      type="date"
+      id="startDate"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+      className="px-2 py-1 border border-gray-300 rounded text-xs lg:text-base w-[250px]"
+    />
+  </div>
 
-        <div className="flex flex-row">
-          <label className="text-sm font-bold mb-1 flex flex-row" htmlFor="endDate">
-            End Date:
-          </label>
-          <input
-            type="date"
-            id="endDate"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="px-1 h-6 border border-gray-300 rounded"
-          />
-        </div>
+  <div className="flex flex-col lg:flex-row lg:items-center lg:gap-2">
+    <label className="text-sm font-bold mb-1 lg:mb-0" htmlFor="endDate">
+      End Date:
+    </label>
+    <input
+      type="date"
+      id="endDate"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+      className="px-2 py-1 border border-gray-300 rounded text-xs lg:text-base w-[250px]"
+    />
+  </div>
 
-        <button
-          onClick={handleSearch}
-          className="bg-gray-400 text-white px-2 h-6 rounded hover:bg-gray-500"
-        >
-          Go
-        </button>
-      </div>
+  <button
+    onClick={handleSearch}
+    className="bg-gray-400 text-white px-2 py-1 h-auto rounded hover:bg-gray-500 text-xs lg:text-base w-[40px]"
+  >
+    Go
+  </button>
+</div>
+
+
 
       <div>
         <p className="text-center text-sm font-bold mb-4">{resultText}</p>
@@ -161,7 +191,7 @@ function App() {
             </tr>
           </thead>
           <tbody className="text-custom-yellow">
-            {rowsToRender.map((item, index) => (
+            {data.map((item, index) => (
               <tr key={index}>
                 <td className="py-2 px-4 border border-gray-200 text-white w-24  sm:text-[18px]">
                   {formattedDate(item.Date)}
