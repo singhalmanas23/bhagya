@@ -191,7 +191,7 @@ function App() {
             </tr>
           </thead>
           <tbody className="text-custom-yellow">
-            {data.map((item, index) => (
+            {datAMap((item, index) => (
               <tr key={index}>
                 <td className="py-2 px-4 border border-gray-200 text-white w-24  sm:text-[18px]">
                   {formattedDate(item.Date)}
